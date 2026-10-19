@@ -430,7 +430,7 @@ function fGeg(){const f=fase();return `
   <div class="fld"><label for="f-g.naam">Naam</label>${inp("g.naam","Voor- en achternaam","",'autocomplete="name"')}</div>
   <div class="g2">
     <div class="fld"><label for="f-g.gj">Geboortejaar</label>${inp("g.gj","bv. 2012","num",'inputmode="numeric" maxlength="4"')}</div>
-    <div class="fld"><label for="f-g.hcp">Handicap</label>${inp("g.hcp","bv. 9,6","num",'inputmode="decimal"')}</div>
+    <div class="fld"><label for="f-g.hcp">Handicap</label>${inp("g.hcp","bv. 9,6","num",'inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"')}</div>
   </div>
   <div class="prompt" id="faseinfo">${faseInfo()}</div>
   <div class="fld"><span class="lab">Houd je statistieken bij van je rondes?</span>
@@ -466,8 +466,8 @@ function fRes(){
 /* ================= Stap 3 · Prestatie ================= */
 function statRows(defs){return defs.map(d=>{const v=S.sc[d.id]||{};return `<div class="str">
     <div><div class="rt">${esc(d.l)}</div><div class="rs">${esc(d.u)||"&nbsp;"}</div></div>
-    ${inp(`sc.${d.id}.nu`,"nu","num",`inputmode="decimal" aria-label="${esc(d.l)} nu"`)}<span class="arr">${IC.arr}</span>
-    ${inp(`sc.${d.id}.dl`,"doel","num",`inputmode="decimal" aria-label="${esc(d.l)} doel"`)}
+    ${inp(`sc.${d.id}.nu`,"nu","num",`inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="${esc(d.l)} nu"`)}<span class="arr">${IC.arr}</span>
+    ${inp(`sc.${d.id}.dl`,"doel","num",`inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="${esc(d.l)} doel"`)}
     ${rlPill(R(d.r))}
     ${d.tee?`<div class="tee"><span class="lab">Gespeeld van tee</span><select class="in" id="f-sc.${d.id}.tee" data-b="sc.${d.id}.tee">${["",...TEES].map(t=>`<option value="${t}" ${v.tee===t?"selected":""}>${t||"Kies…"}</option>`).join("")}</select></div>`:""}
   </div>`}).join("")}
@@ -479,10 +479,11 @@ function fPres(){
   return `
   <div class="card sub">
     <div class="chd"><h3>Scoring</h3><span class="hdnote">nu ${IC.arr} doel${fase()?" · richtlijn "+fase():""}</span></div>
+    <div class="rs">Score onder par? Typ een min, bv. -2. Boven par: +5 of gewoon 5.</div>
     <div>${head}${statRows(SC_BASIS)}${hasStats()?statRows(SC_STATS):""}${S.scE.map((e,i)=>`<div class="str">
       <div>${inp(`scE.${i}.l`,"Eigen doel, bv. birdies per ronde","",`aria-label="Naam eigen doel ${i+1}"`)}</div>
-      ${inp(`scE.${i}.nu`,"nu","num",`inputmode="decimal" aria-label="Eigen doel ${i+1} nu"`)}<span class="arr">${IC.arr}</span>
-      ${inp(`scE.${i}.dl`,"doel","num",`inputmode="decimal" aria-label="Eigen doel ${i+1} doel"`)}
+      ${inp(`scE.${i}.nu`,"nu","num",`inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Eigen doel ${i+1} nu"`)}<span class="arr">${IC.arr}</span>
+      ${inp(`scE.${i}.dl`,"doel","num",`inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Eigen doel ${i+1} doel"`)}
       <div style="justify-self:end"><button class="xbtn" data-act="delscE" data-i="${i}" aria-label="Verwijder eigen doel">${IC.x}</button></div></div>`).join("")}</div>
     <div><button class="btn sm" data-act="addscE">${IC.plus} Eigen doel</button></div>
     ${!hasStats()?`<div class="rs">Houd je wel statistieken bij? Zet dat aan bij <button class="btn sm" data-act="step" data-v="0">Gegevens</button></div>`:""}
@@ -596,8 +597,8 @@ function viewKaart(){
     <div class="card span3"><div class="chd"><h3>Versturen naar de coaches</h3></div>
       <div style="display:grid;gap:8px">
         ${naam()?"":`<div class="rs" style="color:var(--red)">Vul eerst je naam in bij Gegevens.</div>`}
-        <div class="chips"><button class="btn o" data-act="pdf" ${naam()?"":"disabled"}>PDF maken</button><button class="btn" data-act="json">Kopieer voor C@ddie</button></div>
-        ${sent?`<div class="rs">Stuur de PDF als bijlage naar:</div>${COACHES.map(c=>`<div class="mail"><span class="rs">${esc(c.naam)}</span><code>${esc(c.email)}</code><button class="btn sm" data-act="copy" data-v="${esc(c.email)}">Kopieer adres</button><a class="btn sm" style="text-decoration:none;color:inherit" href="mailto:${esc(c.email)}?subject=${encodeURIComponent("Doelen "+SEIZOEN+" – "+naam())}">Open e-mail</a></div>`).join("")}`:`<div class="rs">Maak eerst de PDF. Daarna zie je naar wie je hem stuurt.</div>`}
+        <div class="chips"><button class="btn o" data-act="pdf" ${naam()?"":"disabled"}>PDF delen</button><button class="btn" data-act="json">Kopieer voor C@ddie</button></div>
+        ${sent?`<div class="rs">Nog niet verstuurd? Stuur de PDF als bijlage naar:</div>${COACHES.map(c=>`<div class="mail"><span class="rs">${esc(c.naam)}</span><code>${esc(c.email)}</code><button class="btn sm" data-act="copy" data-v="${esc(c.email)}">Kopieer adres</button><a class="btn sm" style="text-decoration:none;color:inherit" href="mailto:${esc(c.email)}?subject=${encodeURIComponent("Doelen "+SEIZOEN+" – "+naam())}">Open e-mail</a></div>`).join("")}`:`<div class="rs">Op je telefoon opent het deelmenu: kies Mail of WhatsApp en stuur de PDF naar ${esc(COACHES[0].naam)} (${esc(COACHES[0].email)}). Op een laptop wordt de PDF opgeslagen; stuur hem daarna als bijlage.</div>`}
       </div></div>
   </div>`;
 }
@@ -758,6 +759,12 @@ async function makePdf(){
   const fname=`Doelen ${SEIZOEN} - ${naam()}.pdf`;
   const blob=d.output("blob");
   let done=false;
+  /* 1. Telefoon/tablet: deel het bestand direct via het deelmenu (Mail, WhatsApp, AirDrop) */
+  try{const file=new File([blob],fname,{type:"application/pdf"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:`Doelen ${SEIZOEN} – ${naam()}`,text:`Mijn doelen voor seizoen ${SEIZOEN}. Voor: ${COACHES.map(c=>c.email).join(", ")}`});
+      sent=true;render();toast("PDF gedeeld");return}}
+  catch(err){if(err&&err.name==="AbortError"){sent=true;render();toast("Delen geannuleerd");return}}
   try{const dl=window.claude?.use?await window.claude.use("downloads"):null;
     if(dl){await dl.save({filename:fname,data:blob});done=true}}
   catch(err){if(err&&err.code==="declined"){toast("Opslaan geannuleerd");return}}
