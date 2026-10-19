@@ -1,0 +1,759 @@
+<meta charset="utf-8">
+<title>TOP Doelen 2027</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500;600;700;800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* Layout: C@ddie-pagina. "Invullen" = stappenplan (7 stappen) met samenvatting rechts; "Doelenkaart" = kaartenraster + PDF voor coaches */
+:root{
+  --or:#F47C20; --or-soft:#FDEBDD; --or-ink:#B4561A;
+  --ink:#2B2F33; --mu:#7A7F85; --mu2:#A9AEB3; --ln:#E6E8EA;
+  --pa:#F2F3F5; --wh:#FFFFFF; --red:#C2383A; --grn:#17a05c;
+  --f:"Albert Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sh:0 2px 10px rgba(43,47,51,.07);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--pa);color:var(--ink);font:400 14px/1.45 var(--f);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 48px}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--or);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:14px}
+.ic{display:inline-block;vertical-align:-2px;flex:none}
+.cap{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mu)}
+
+/* kop */
+.spkop{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px}
+.who{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
+.av{width:38px;height:38px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:600;flex:none;font-size:14px}
+.who h1{margin:0;font-size:21px;font-weight:600;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who>div:last-child{min-width:0}
+.who .sub{font-size:12px;color:var(--mu)}
+.seg{display:inline-flex;background:var(--wh);border-radius:999px;padding:3px;box-shadow:var(--sh)}
+.seg button{border:0;background:none;border-radius:999px;padding:7px 14px;font-weight:500;color:var(--mu);white-space:nowrap}
+.seg button.on{background:var(--pa);color:var(--ink);box-shadow:0 1px 4px rgba(43,47,51,.12)}
+.kpis{display:inline-grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px}
+.cvkpi{background:var(--wh);border-radius:999px;padding:6px 14px;display:flex;align-items:baseline;gap:6px;white-space:nowrap;box-shadow:var(--sh)}
+.cvkpi b{font-weight:500;font-size:16px;font-variant-numeric:tabular-nums}
+.cvkpi span{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mu)}
+.cvkpi.o b{color:var(--or)}
+.prof{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{background:var(--wh);border-radius:999px;padding:4px 11px;font-size:12px;box-shadow:var(--sh)}
+.pchip b{font-weight:600}
+.pchip.o{background:var(--or-soft);color:var(--or-ink);box-shadow:none}
+
+/* kaarten */
+.card{background:var(--wh);border-radius:14px;box-shadow:var(--sh);padding:13px;min-width:0;display:grid;gap:11px;align-content:start}
+.card.sub{box-shadow:none;border:1.5px solid var(--ln)}
+.chd{display:flex;align-items:center;gap:8px;padding-bottom:9px;border-bottom:1px solid var(--ln);min-width:0;flex-wrap:wrap}
+.chd h3{margin:0;font-size:14.5px;font-weight:500}
+.cvn{background:var(--pa);border-radius:999px;padding:1px 8px;font-size:11px;font-weight:600;color:var(--mu)}
+.cvn.o{background:var(--or-soft);color:var(--or-ink)}
+.hdnote{margin-left:auto;color:var(--mu);font-size:11.5px;text-align:right}
+.xbtn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--ln);background:var(--wh);color:var(--mu);display:grid;place-items:center;font-size:13px;flex:none;padding:0}
+.chd .xbtn.end{margin-left:auto}
+.btn{border-radius:999px;padding:8px 16px;font-weight:600;border:1.5px solid var(--ln);background:var(--wh);white-space:nowrap;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn.o{background:var(--or);border-color:var(--or);color:#fff}
+.btn.sm{padding:5px 12px;font-size:12.5px}
+.btn[disabled]{opacity:.4;cursor:default}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ln);background:var(--wh);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:500;color:var(--ink)}
+.chip.on{background:var(--mu);border-color:var(--mu);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.st{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 8px;background:var(--pa);color:var(--mu);white-space:nowrap}
+.st.or{background:var(--or-soft);color:var(--or-ink)}
+.cdd{font-size:10.5px;color:var(--mu2)}
+.cdd::before{content:"C@ddie: ";font-weight:700}
+.empty{color:var(--mu);font-size:13px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rl{font-size:11px;font-weight:600;color:var(--or-ink);background:var(--or-soft);border-radius:999px;padding:3px 9px;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* velden */
+.fld{display:grid;gap:5px;min-width:0}
+.fld>label,.lab{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mu)}
+.in{width:100%;font-size:16px;border:1.5px solid var(--ln);border-radius:10px;background:var(--wh);padding:8px 10px;min-width:0}
+textarea.in{resize:vertical;min-height:64px}
+select.in{appearance:none;padding-right:26px;background-image:linear-gradient(45deg,transparent 50%,var(--mu) 50%),linear-gradient(135deg,var(--mu) 50%,transparent 50%);background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+.in:focus{border-color:var(--or);outline:none}
+.in::placeholder{color:var(--mu2)}
+.in.num{text-align:center;font-variant-numeric:tabular-nums;font-weight:600;padding:7px 4px}
+.note{padding-top:10px;border-top:1px solid var(--ln)}
+.note textarea.in{min-height:56px}
+.knote{background:var(--pa);border-radius:12px;padding:9px 11px;display:grid;gap:2px;font-size:13px;white-space:pre-wrap}
+.prompt{background:var(--pa);border-radius:12px;padding:10px 12px;font-size:12.5px;display:grid;gap:2px}
+.prompt .cap{color:var(--or)}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+
+/* rijen */
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--ln)}
+.row:last-child{border-bottom:0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--mu2)}
+.dot.o{background:var(--or)}
+.rt{font-size:13px;font-weight:600}
+.rs{font-size:11.5px;color:var(--mu)}
+
+/* stappen */
+.steps{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;background:var(--wh);border-radius:14px;padding:8px;box-shadow:var(--sh)}
+.sb{border:0;background:none;border-radius:10px;padding:7px 6px;display:flex;align-items:center;gap:7px;text-align:left;min-width:0}
+.sb i{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:700;background:var(--pa);color:var(--mu)}
+.sb span{font-size:12.5px;font-weight:500;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb.done i{background:var(--mu);color:#fff}
+.sb.on{background:var(--pa)}
+.sb.on i{background:var(--or);color:#fff}
+.sb.on span{color:var(--ink);font-weight:600}
+.wbody{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+.shead{display:grid;gap:2px}
+.shead h2{margin:0;font-size:19px;font-weight:600;text-wrap:balance}
+.shead p{margin:0;color:var(--mu);font-size:13px;max-width:62ch}
+.wfoot{display:flex;justify-content:space-between;gap:8px;padding-top:4px}
+.side{position:sticky;top:12px;display:grid;gap:12px}
+.mini .row{grid-template-columns:auto minmax(0,1fr);padding:7px 0}
+
+/* blokken */
+.blk{display:grid;gap:10px;padding:11px;border:1.5px solid var(--ln);border-radius:12px;position:relative}
+.blk>.xbtn{position:absolute;top:8px;right:8px;width:24px;height:24px;font-size:11px}
+.blk .pr{padding-right:30px}
+
+/* statistieken nu → doel */
+.sth,.str{display:grid;grid-template-columns:minmax(0,1fr) 64px 12px 64px minmax(0,120px);gap:8px;align-items:center}
+.str{padding:8px 0;border-top:1px solid var(--ln)}
+.str .arr{color:var(--mu2);display:grid;place-items:center}
+.str .arr .ic{width:11px;height:11px}
+.str .rl{justify-self:end}
+.str .tee{grid-column:1/-1;display:flex;gap:8px;align-items:center}
+.str .tee select{max-width:180px}
+
+/* stellingen */
+.cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{border:0;background:var(--pa);border-radius:999px;padding:6px 12px;font-weight:500;font-size:12.5px;color:var(--mu);white-space:nowrap;display:flex;gap:6px;align-items:center}
+.cat.on{background:var(--ink);color:#fff}
+.cat .n{background:var(--or);color:#fff;border-radius:999px;font-size:10px;font-weight:700;min-width:17px;height:17px;display:grid;place-items:center;padding:0 4px}
+.stmt{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px;border:1.5px solid var(--ln);border-radius:12px;background:var(--wh);text-align:left;width:100%}
+.stmt .ck{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--mu2);display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700}
+.stmt.on{border-color:var(--ink);background:var(--pa)}
+.stmt.on .ck{background:var(--or);border-color:var(--or)}
+.stmt .tx{font-size:13.5px;font-weight:500}
+.sgrp{display:grid;gap:7px}
+.lead{font-size:15px;font-weight:600}
+.addline{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,140px) auto;gap:8px}
+
+/* schuiven */
+.sl{display:grid;grid-template-columns:44px minmax(0,1fr) 30px;gap:10px;align-items:center}
+.sl .v{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:26px;background:transparent;margin:0;--p:0%;--c:var(--mu)}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:999px;background:linear-gradient(90deg,var(--c) var(--p),var(--pa) var(--p))}
+input[type=range]::-moz-range-track{height:8px;border-radius:999px;background:linear-gradient(90deg,var(--c) var(--p),var(--pa) var(--p))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--wh);border:2px solid var(--c);margin-top:-7px;box-shadow:0 1px 4px rgba(43,47,51,.2)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--wh);border:2px solid var(--c)}
+input[type=range].dl{--c:var(--or)}
+.ogroup{display:grid;gap:10px}
+.ogroup>.cap{padding-top:4px}
+.oitem{display:grid;gap:9px;padding:12px;border:1.5px solid var(--ln);border-radius:12px}
+.oitem .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.oitem .top .rs{flex:1 1 100%}
+.ptlist{display:grid;gap:6px}
+.pt{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;background:var(--pa);border-radius:10px;padding:6px 6px 6px 10px}
+.pt .xbtn{width:24px;height:24px;font-size:11px}
+.addpt{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+
+/* acties */
+.arow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,250px) 200px;gap:8px 12px;align-items:start;padding:12px 0;border-top:1px solid var(--ln)}
+.arow>.rl{justify-self:end;margin-top:6px}
+.arow .full{grid-column:1/-1}
+.arow:first-child{border-top:0}
+.ain{display:flex;gap:6px;align-items:center}
+.ain .in.num{width:70px}
+.ain span{color:var(--mu);font-size:12.5px;white-space:nowrap}
+.verd{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.verd .tile{background:var(--pa);border-radius:12px;padding:8px;display:grid;gap:4px;text-align:center}
+.verd .tile .in.num{background:var(--wh)}
+.verd .fixed{font-weight:600;font-variant-numeric:tabular-nums;padding:8px 0;border:1.5px solid transparent}
+.sum{font-size:12px;font-weight:600;display:flex;gap:5px;align-items:center}
+.sum.ok{color:var(--grn)}.sum.bad{color:var(--red)}
+
+/* wensen */
+.wl{display:grid;gap:8px;counter-reset:w;margin:0;padding:0;list-style:none}
+.wl li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center;counter-increment:w}
+.wl li::before{content:counter(w);width:26px;height:26px;border-radius:50%;background:var(--pa);display:grid;place-items:center;font-weight:700;font-size:12px;color:var(--mu)}
+
+/* doelenkaart */
+.dgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;align-items:start}
+.span3{grid-column:1/-1}.span2{grid-column:span 2}
+.dream{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,38ch);gap:14px;align-items:center}
+.dream q{font-size:20px;font-weight:500;line-height:1.3;quotes:none;text-wrap:balance}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.tile2{background:var(--pa);border-radius:12px;padding:9px 10px;display:grid;gap:2px;min-width:0}
+.tile2 .big{font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.15}
+.tile2 .big small{font-size:13px;color:var(--or-ink);font-weight:600}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) 140px 44px;gap:10px;align-items:center;padding:7px 0}
+.trk{position:relative;height:10px;background:var(--pa);border-radius:999px}
+.trk .fill{position:absolute;left:0;top:0;bottom:0;background:var(--mu2);border-radius:999px}
+.trk .tg{position:absolute;top:-3px;width:3px;height:16px;background:var(--or);border-radius:2px}
+.bar .lbl{font-size:13px;font-weight:500;min-width:0;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.bar .val{font-size:11.5px;color:var(--mu);font-variant-numeric:tabular-nums;text-align:right}
+.bsub{font-size:11.5px;color:var(--mu);padding:0 0 6px}
+.legend{display:flex;gap:12px;font-size:11px;color:var(--mu);margin-left:auto}
+.legend i{display:inline-block;width:12px;height:6px;border-radius:3px;background:var(--mu2);margin-right:5px;vertical-align:middle}
+.legend i.o{width:3px;height:12px;background:var(--or)}
+.mail{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--pa);border-radius:12px;padding:8px 10px}
+.mail code{font:600 13px var(--f);user-select:all;margin-right:auto}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--wh);color:var(--ink);border-radius:999px;padding:9px 16px;box-shadow:0 4px 18px rgba(43,47,51,.18);font-weight:500;z-index:20}
+.foot{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:11.5px;color:var(--mu2)}
+.foot button{border:0;background:none;color:var(--mu);text-decoration:underline;padding:0;font-size:11.5px}
+
+@media (max-width:899px){.wbody{grid-template-columns:1fr}.side{display:none}}
+@media (max-width:699px){
+  .steps{padding:6px;gap:2px}
+  .sb{justify-content:center}
+  .prof{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pchip{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .g2,.g3{grid-template-columns:1fr}
+  .kpis{display:flex;flex-wrap:wrap}
+  .sth,.str{grid-template-columns:minmax(0,1fr) 54px 10px 54px}
+  .sth>:last-child{display:none}
+  .str .rl{grid-column:1/-1;justify-self:start}
+  .dgrid{grid-template-columns:1fr}.span2{grid-column:auto}
+  .dream{grid-template-columns:1fr}.dream q{font-size:17px}
+  .bar{grid-template-columns:minmax(0,1fr) 90px 40px}
+  .addline{grid-template-columns:1fr}
+  .stmt{grid-template-columns:22px minmax(0,1fr)}
+  .stmt .rl{grid-column:2;justify-self:start}
+  .arow{grid-template-columns:1fr}
+  .arow>.rl{justify-self:start;margin-top:0}
+  .arow>div:empty{display:none}
+  .sb span{display:none}
+  .sb{padding:4px 0}
+  .cats{flex-wrap:wrap;overflow:visible}
+  .row:has(> .rl){grid-template-columns:auto minmax(0,1fr)}
+  .row > .rl{grid-column:2;justify-self:start}
+  .stmt>span:last-child{grid-column:2;justify-self:start}
+  .verd{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+
+<div class="wrap" id="app"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ================= Iconen (SVG, geen speciale tekens) ================= */
+const sv=(d,w=14)=>`<svg class="ic" width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const IC={x:sv('<path d="M6 6l12 12M18 6L6 18"/>',12),chk:sv('<path d="M5 12.5l4.5 4.5L19 7"/>',13),arr:sv('<path d="M5 12h14M13 6l6 6-6 6"/>',13),prev:sv('<path d="M15 6l-6 6 6 6"/>',14),next:sv('<path d="M9 6l6 6-6 6"/>',14),edit:sv('<path d="M4 20h4L19 9l-4-4L4 16z"/>',13),plus:sv('<path d="M12 5v14M5 12h14"/>',13)};
+/* ================= Instellingen ================= */
+const SEIZOEN=2027;
+const COACHES=[{naam:"Tom Stam",email:"tom.stam@ngf.nl"}];
+const GRENS=12; /* hcp > 12 = Advanced 1, hcp ≤ 12 = Advanced 2 */
+
+/* ================= Richtlijnen [A1, A2] ================= */
+const SC_BASIS=[
+  {id:"hcp",l:"Handicap",u:"",r:["–","–"]},
+  {id:"gem",l:"Gem. score t.o.v. par (beste 80%)",u:"slagen",r:["max. hcp + 3","max. hcp + 3"]},
+  {id:"best",l:"Beste ronde t.o.v. par",u:"",r:["–","–"],tee:1},
+  {id:"lepar",l:"Scores par of beter",u:"per ronde",r:["7","11"]}
+];
+const SC_STATS=[
+  {id:"gew",l:"Slagen gewonnen t.o.v. par",u:"per ronde",r:["0,5","1"]},
+  {id:"verl",l:"Slagen verloren t.o.v. par",u:"per ronde",r:["max. 16","max. 9"]},
+  {id:"p3",l:"Scoring par 3",u:"gemiddeld",r:["3,7","3,4"]},
+  {id:"p4",l:"Scoring par 4",u:"gemiddeld",r:["4,9","4,5"]},
+  {id:"p5",l:"Scoring par 5",u:"gemiddeld",r:["5,8","5,4"]}
+];
+const TEES=["Wit","Geel","Blauw","Rood","Oranje"];
+const OND=[
+ {k:"scoring",n:"Scoring",stats:[],items:[
+  ["sc1","Minder hoge scores op de kaart (double bogey en hoger)","max. 6 per ronde","max. 2 per ronde"],
+  ["sc2","Vaker par of beter maken","7 per ronde","11 per ronde"],
+  ["sc3","Beter scoren op par 3's","gem. 3,7","gem. 3,4"],
+  ["sc11","Beter scoren op par 4's","gem. 4,9","gem. 4,5"],
+  ["sc4","Beter scoren op par 5's","gem. 5,8","gem. 5,4"],
+  ["sc5","Minder strafslagen","max. 2 per ronde","max. 1 per ronde"],
+  ["sc6",["Na een double bogey of hoger direct herstellen met een bogey","Na een bogey of hoger direct herstellen met een par"],"40%","30%"],
+  ["sc7","Sterker starten (hole 1–6)","max. +5","max. +3"],
+  ["sc8","Sterker middenstuk (hole 7–12)","max. +5","max. +3"],
+  ["sc9","Sterker afsluiten (hole 13–18)","max. +5","max. +3"],
+  ["sc10","Vaker op of onder mijn handicap spelen","1 op 4 rondes","1 op 4 rondes"]]},
+ {k:"driving",n:"Driving",stats:[{id:"fw",l:"Fairways geraakt",u:"%",r:["45%","55%"]},{id:"pen",l:"Strafslagen vanaf de tee",u:"per ronde",r:["max. 10%","max. 10%"]}],items:[
+  ["dr1","Vaker speelbaar liggen voor de tweede slag","80%","90%"],
+  ["dr2","Meer fairways raken","45%","55%"],
+  ["dr3","Minder tee shots in een penalty area of onspeelbare situatie","max. 10%","max. 10%"],
+  ["dr4","Verder slaan met de driver","+15 m carry","+15 m carry"],
+  ["dr5","Een betrouwbare tee shot met driver, hout, hybride of lang ijzer voor smalle holes, of wanneer mijn driver niet loopt","90% binnen 30 m","90% binnen 30 m"],
+  ["dr6","Spreiding met de driver verbeteren","spreiding < 10%","spreiding < 10%"]]},
+ {k:"approach",n:"Approach",range:"vanaf 125 m",stats:[{id:"gir",l:"Greens in regulation",u:"per ronde",r:["5","9"]}],items:[
+  ["ap1","Meer greens in regulation","28% · 5 per ronde","50% · 9 per ronde"],
+  ["ap2","Beter van 125–150 m","GIR 30% · SG -0,40","GIR 45% · SG -0,28"],
+  ["ap3","Beter van 150–175 m","GIR 20% · SG -0,45","GIR 34% · SG -0,32"],
+  ["ap4","Beter van 175 m en verder","GIR 10% · SG -0,60","GIR 20% · SG -0,45"],
+  ["ap5","Constanter mijn afstanden kunnen slaan per club","carry-afwijking < 10%","carry-afwijking < 10%"],
+  ["ap6","Afstandscontrole 125–175 m verbeteren","< 10%","< 10%"],
+  ["ap7","Spreiding links/rechts 125–175 m verbeteren","< 10%","< 10%"],
+  ["ap8","Totale spreiding 125–175 m verbeteren","< 10%","< 10%"],
+  ["ap9","Gemiste greens aan de slimme kant, niet in moeilijke slagen of penalty areas","90%","90%"],
+  ["ap10","Vaker birdiekansen (binnen 6 m)","1 per ronde · 6%","3 per ronde · 17%"]]},
+ {k:"wedge",n:"Wedge play",range:"50–125 m",stats:[{id:"gw",l:"Greens geraakt 50–125 m",u:"%",r:["52%","68%"]}],items:[
+  ["we1","Meer greens raken van 50–75 m","65%","80%"],
+  ["we2","Meer greens raken van 75–100 m","52%","68%"],
+  ["we3","Meer greens raken van 100–125 m","40%","55%"],
+  ["we4","Afstandscontrole 50–125 m verbeteren","< 10%","< 7%"],
+  ["we5","Spreiding links/rechts 50–125 m verbeteren","< 10%","< 7%"],
+  ["we6","Totale spreiding 50–125 m verbeteren","< 10%","< 7%"],
+  ["we7","Mijn afstanden kennen met 3 swinglengtes per wedge","± 7 m","± 5 m"],
+  ["we8","Dichter bij de vlag spelen van 50–125 m","gem. 10 m","gem. 7 m"],
+  ["we9","Vaker binnen 3 m van de vlag van 50–125 m","15%","25%"]]},
+ {k:"short",n:"Short game",range:"tot 50 m",stats:[{id:"ud",l:"Up & down",u:"%",r:["30%","45%"]},{id:"ss",l:"Sand saves",u:"%",r:["15%","30%"]}],items:[
+  ["sh1","Short game totaal: vaker up & down","30%","45%"],
+  ["sh2","Chippen laag tot 30 m (fairway/rough): ballen dichterbij spelen","SG -0,25 · prox 3,5 m · spreiding < 10%","SG -0,12 · prox 2,5 m · spreiding < 10%"],
+  ["sh3","Chippen hoog tot 30 m (fairway/rough): ballen dichterbij spelen","SG -0,35 · prox 4,5 m · spreiding < 20%","SG -0,18 · prox 3 m · spreiding < 20%"],
+  ["sh4","Bunkerspel tot 30 m: ballen dichterbij spelen","SG -0,50 · prox 6 m · spreiding < 30%","SG -0,25 · prox 4 m · spreiding < 30%"],
+  ["sh5","Short game 30–50 m (fairway/rough): ballen dichterbij spelen","SG -0,35 · prox 7 m · spreiding < 20%","SG -0,20 · prox 5 m · spreiding < 20%"],
+  ["sh6","In één slag uit de bunker","85%","95%"],
+  ["sh7","Hard en specialty shots op de green spelen","50%","70%"]]},
+ {k:"putten",n:"Putten",stats:[{id:"pt",l:"Putts",u:"per ronde",r:["33","31"]},{id:"tp",l:"3-putts",u:"per ronde",r:["max. 4","max. 2"]}],items:[
+  ["pu1","Beter worden in het uitholen van putts van 3–5 ft","75%","85%"],
+  ["pu2","Beter worden in het uitholen van putts van 6–10 ft","30%","40%"],
+  ["pu3","Beter worden in het uitholen van putts van 10–15 ft","15%","22%"],
+  ["pu4","Beter worden in het uitholen van putts van 15–25 ft","7%","10%"],
+  ["pu5","Snelheidscontrole: gemiste putts tot 20 ft eindigen 0–50 cm voorbij de hole","60%","80%"],
+  ["pu6","Lag putts van 20–40 ft binnen 3 ft van de hole","75%","90%"],
+  ["pu7","Lag putts buiten 40 ft binnen 10% van de afstand","75%","90%"],
+  ["pu8","Startlijn verbeteren (gate-test op 2 m)","7 van 10","9 van 10"],
+  ["pu9","Minder 3-putts","max. 4 per ronde","max. 2 per ronde"],
+  ["pu10","Strokes gained per putt verbeteren","SG -0,050","SG -0,025"]]}
+];
+const ONTW=[
+ {g:"Techniek & Golfskills",items:[["driving","Driving"],["approach","Approach"],["wedge","Wedge"],["short","Short game","Chippen en bunker"],["putten","Putten"]]},
+ {g:"Fysiek",items:[["fysiek","Fysiek","Mobiliteit, kracht, snelheid, conditie"]]},
+ {g:"Strategie & Golf IQ",items:[["strategie","Strategie & Golf IQ","Baanplan, doelkeuze, risico afwegen, regels"]]},
+ {g:"Prestatiegedrag",items:[["mentaal","Prestatiegedrag (mentaal)","Routine, focus, omgaan met fouten en spanning"]]},
+ {g:"Overig",items:[["overig","Overig","Materiaal, voeding, slaap en herstel, trainingsplanning, balans school en sport"]]}
+];
+const ONTW_FLAT=ONTW.flatMap(g=>g.items.map(i=>({k:i[0],n:i[1],h:i[2]||"",g:g.g})));
+const IMPACT=["Laag","Middel","Hoog"];
+const TOER=["Club","Regio","Nationaal","Internationaal"];
+const AR={uren:["6–8 uur","8–12 uur"],verd:["Baan 50% · rest verdelen","Baan 50% · rest verdelen"],fys:["2× 45 min","2× 45 min"],holes:["9","18"],wr:["10–20","20–35"],toer:["Club + regio","Club + regio + nationaal"],comp:["min. 1 competitie","min. 1 competitie"]};
+
+const STEPS=[
+ ["Gegevens","Wie ben je?","Vul je gegevens in.","Weet je je exacte handicap niet? Kijk in de GOLF.NL-app."],
+ ["Droom","Waar droom je van?","Denk ver vooruit, 5 tot 10 jaar. Het mag groot zijn.","Wat wil je ooit bereiken in golf? En waarom wil je dat zo graag?"],
+ ["Resultaat","Wat wil je in "+SEIZOEN+" bereiken?","Kies 2 of 3 resultaten die je dichter bij je droom brengen.","Een resultaat kun je afvinken: een plek in een toernooi, een positie op een ranking of een selectie. Je handicapdoel vul je in bij Prestatie."],
+ ["Prestatie","Wat wil je op het gebied van prestaties bereiken?","Vul je scoring in. Kies daarna per onderdeel je belangrijkste prestatiedoelen.","Kies er in totaal 3 tot 6, op de onderdelen waar jij de meeste slagen kunt winnen."],
+ ["Ontwikkeling","Wat moet je daarvoor ontwikkelen?","Geef jezelf per onderdeel een cijfer van 0 tot 10, nu en als doel. Geef aan hoeveel impact het heeft op je score.","Schrijf ontwikkelpunten op bij de onderdelen met de meeste impact. Wat moet je concreet beter kunnen?"],
+ ["Acties","Wat ga je daarvoor doen?","Maak een algemeen plan voor je seizoen: hoeveel je traint, hoe je het verdeelt en hoeveel je speelt.","De richtlijn laat zien wat bij jouw fase past. Wees eerlijk over wat haalbaar is naast school."],
+ ["Wensen","Wat wil je graag eens doen in de trainingen?","Schrijf elke wens als één zin. Zet de belangrijkste bovenaan.","Er is geen fout antwoord. Je coaches gebruiken dit bij het plannen van de trainingen."]
+];
+
+/* ================= Staat ================= */
+const KEY="top-doelen-"+SEIZOEN;
+const blank=()=>({
+  g:{naam:"",gj:"",hcp:"",stats:""},
+  droom:"",waarom:"",
+  res:[{t:"",w:"",a:"",b:""},{t:"",w:"",a:"",b:""}],
+  sc:{},scE:[],stel:{},eigen:[],
+  ow:Object.fromEntries(ONTW_FLAT.map(o=>[o.k,{nu:null,dl:null,imp:"",pts:[]}])),
+  ac:{uren:"",lang:"",short:"",putt:"",fysX:"",fysM:"",holes:"",wr:"",toer:{},comp:"",comps:[""],eigen:[]},
+  wens:[""],
+  notes:{}
+});
+let S=blank();
+try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);S=Object.assign(blank(),p);S.notes=S.notes||{};S.ow=Object.assign(blank().ow,p.ow||{});S.ac=Object.assign(blank().ac,p.ac||{})}}catch(e){}
+let step=0,mode="vul",cat="scoring",confirmWis=false,sent=false;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+/* ================= Hulp ================= */
+const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+const getP=p=>p.split(".").reduce((o,k)=>o?.[k],S);
+function setP(p,v){const ks=p.split(".");let o=S;ks.slice(0,-1).forEach(k=>{if(o[k]==null)o[k]={};o=o[k]});o[ks.at(-1)]=v}
+const hcpNum=()=>{const n=parseFloat(String(S.g.hcp).replace(",",".").replace("+","-"));return isNaN(n)?null:n};
+const fase=()=>{const h=hcpNum();return h==null?null:(h>GRENS?"A1":"A2")};
+const FI=()=>fase()==="A1"?0:1;
+const faseNaam=()=>fase()==="A1"?"Advanced 1":fase()==="A2"?"Advanced 2":"";
+const R=r=>Array.isArray(r)?r[FI()]:r;
+const T=t=>Array.isArray(t)?t[FI()]:t;
+const leeftijdCat=()=>{const gj=+S.g.gj;if(!gj)return "";const l=SEIZOEN-gj;return l<=12?"U12":l<=14?"U14":l<=16?"U16":l<=18?"U18":"18+"};
+const hasStats=()=>S.g.stats==="ja";
+const allStmts=()=>OND.flatMap(c=>c.items.map(i=>({id:i[0],t:T(i[1]),r:FI()?i[3]:i[2],c:c.k,cn:c.n})));
+const chosen=()=>[...allStmts().filter(s=>S.stel[s.id]),...S.eigen.map((e,i)=>({id:"e"+i,t:e.t,r:e.r||"",c:e.c,cn:OND.find(c=>c.k===e.c)?.n||"",eigen:1}))];
+const countCat=k=>chosen().filter(s=>s.c===k).length;
+const statDefs=()=>[...SC_BASIS,...(hasStats()?SC_STATS:[]),...(hasStats()?OND.flatMap(o=>o.stats.map(s=>({...s,cn:o.n}))):[])];
+const filledStats=()=>[...statDefs().map(d=>({...d,v:S.sc[d.id]||{}})),...S.scE.map((e,i)=>({id:"eigen"+i,l:e.l||"Eigen doel",u:"eigen doel",r:["–","–"],v:e}))].filter(d=>d.v.nu||d.v.dl);
+const resText=r=>{if(r.t==="Handicap")return `Handicap van ${r.a||"…"} naar ${r.b||"…"}`;if(r.t==="Toernooi")return `${r.b||"…"} op ${r.a||"…"}`;if(r.t==="Ranking")return `Positie ${r.b||"…"} op de ${r.a||"…"}`;if(r.t==="Selectie")return `Selectie: ${r.a||"…"}`;return ""};
+const resF=()=>S.res.filter(r=>r.t&&(r.a||r.b));
+const owTouched=()=>ONTW_FLAT.filter(o=>{const w=S.ow[o.k];return w.nu!=null||w.dl!=null||w.imp||w.pts.length});
+const wensF=()=>S.wens.map(w=>w.trim()).filter(Boolean);
+const naam=()=>S.g.naam.trim();
+const initials=()=>naam()?naam().split(/\s+/).filter(w=>w[0]&&w[0]===w[0].toUpperCase()).map(w=>w[0]).slice(0,2).join("")||naam()[0].toUpperCase():"?";
+function toast(t){const el=document.getElementById("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>el.hidden=true,2600)}
+const inp=(p,ph,cls="",extra="")=>`<input class="in ${cls}" id="f-${p}" data-b="${p}" value="${esc(getP(p))}" placeholder="${esc(ph)}" ${extra}>`;
+const ta=(p,ph)=>`<textarea class="in" id="f-${p}" data-b="${p}" placeholder="${esc(ph)}">${esc(getP(p))}</textarea>`;
+const NK=["geg","droom","res","pres","ontw","act","wens"];
+const NOTE_PH=["Bijvoorbeeld: andere sporten, school, blessures","Wil je nog iets vertellen over je droom?","Toelichting bij je resultaten","Algemene toelichting bij je prestatiedoelen","Toelichting bij je ontwikkeling","Toelichting bij je plan, bv. drukke periodes op school","Toelichting bij je wensen"];
+const note=(key,label,ph)=>`<div class="fld note"><label for="f-notes.${key}">${label}</label><textarea class="in" id="f-notes.${key}" data-b="notes.${key}" placeholder="${esc(ph||"Optioneel")}">${esc(S.notes[key]||"")}</textarea></div>`;
+const nt=k=>(S.notes[k]||"").trim();
+const knote=(k,label="Toelichting")=>nt(k)?`<div class="knote"><span class="cap">${label}</span><div>${esc(nt(k))}</div></div>`:"";
+const rlPill=r=>r&&r!=="–"?`<span class="rl">Richtlijn ${esc(r)}</span>`:"<span></span>";
+const acSummary=()=>{const a=S.ac,L=[];
+  if(a.uren)L.push(["Golftraining per week",a.uren+" uur",AR.uren]);
+  if(a.lang||a.short||a.putt)L.push(["Verdeling training",`Baan 50% · lange spel ${a.lang||0}% · short game ${a.short||0}% · putten ${a.putt||0}%`,AR.verd]);
+  if(a.fysX||a.fysM)L.push(["Fysieke training per week",`${a.fysX||"…"}× ${a.fysM||"…"} min`,AR.fys]);
+  if(a.holes)L.push(["Holes spelen per week",a.holes+" holes",AR.holes]);
+  if(a.wr)L.push(["Wedstrijdrondes per jaar",a.wr+" rondes",AR.wr]);
+  const t=TOER.filter(x=>a.toer[x]?.on);if(t.length)L.push(["Toernooien",t.map(x=>x+(a.toer[x].n?` (${a.toer[x].n})`:"")).join(" · "),AR.toer]);
+  if(a.comp)L.push(["Competitie",a.comp==="ja"?(a.comps.filter(x=>x.trim()).join(" · ")||"Ja"):"Speelt geen competitie",AR.comp]);
+  a.eigen.filter(x=>x.trim()).forEach(x=>L.push(["Eigen actie",x,null]));
+  return L};
+
+/* ================= Kop ================= */
+function kop(){
+  const kp=mode==="vul"
+   ?`<div class="kpis"><div class="cvkpi"><b>${step+1}/7</b><span>Stap</span></div><div class="cvkpi o"><b>${chosen().length}</b><span>Doelen</span></div></div>`
+   :`<div class="kpis"><div class="cvkpi"><b>${resF().length}</b><span>Resultaat</span></div><div class="cvkpi o"><b>${chosen().length}</b><span>Prestatiedoelen</span></div><div class="cvkpi"><b>${wensF().length}</b><span>Wensen</span></div></div>`;
+  const pr=`<span class="pchip">Geboren <b>${esc(S.g.gj)||"–"}</b></span><span class="pchip">Categorie <b>${leeftijdCat()||"–"}</b></span><span class="pchip">Handicap <b>${esc(S.g.hcp)||"–"}</b></span><span class="pchip ${fase()?"o":""}">MJOP <b>${fase()||"–"}</b></span>`;
+  return `<div class="spkop">
+    <div class="who"><div class="av">${esc(initials())}</div><div><h1>${esc(naam()||"Mijn doelen")}</h1><div class="sub">Doelen seizoen ${SEIZOEN} · TOP Almeerderhout</div></div></div>
+    ${kp}
+    <div class="seg" role="tablist" aria-label="Weergave"><button id="m-vul" class="${mode==="vul"?"on":""}" data-mode="vul">Invullen</button><button id="m-kaart" class="${mode==="kaart"?"on":""}" data-mode="kaart">Doelenkaart</button></div>
+  </div><div class="prof">${pr}</div>`;
+}
+
+/* ================= Stap 0 · Gegevens ================= */
+function fGeg(){const f=fase();return `
+  <div class="fld"><label for="f-g.naam">Naam</label>${inp("g.naam","Voor- en achternaam","",'autocomplete="name"')}</div>
+  <div class="g2">
+    <div class="fld"><label for="f-g.gj">Geboortejaar</label>${inp("g.gj","bv. 2012","num",'inputmode="numeric" maxlength="4"')}</div>
+    <div class="fld"><label for="f-g.hcp">Handicap</label>${inp("g.hcp","bv. 9,6","num",'inputmode="decimal"')}</div>
+  </div>
+  <div class="prompt" id="faseinfo">${faseInfo()}</div>
+  <div class="fld"><span class="lab">Houd je statistieken bij van je rondes?</span>
+    <div class="chips">${[["ja","Ja"],["nee","Nog niet"]].map(o=>`<button class="chip ${S.g.stats===o[0]?"on":""}" data-act="stats" data-v="${o[0]}">${o[1]}</button>`).join("")}</div>
+    <span class="rs">Bij "Ja" kun je ook doelen voor je statistieken invullen.</span></div>
+  <div class="cdd">Spelersprofiel</div>`}
+function faseInfo(){const f=fase();return `<span class="cap">Jouw fase</span>${f?`MJOP ${f} · ${faseNaam()}`:"Vul je handicap in"}`}
+
+/* ================= Stap 1 · Droom ================= */
+function fDroom(){return `
+  <div class="fld"><label for="f-droom">Mijn droom</label>${ta("droom","Bijvoorbeeld: ooit op de European Tour spelen")}</div>
+  <div class="fld"><label for="f-waarom">Waarom is dit belangrijk voor mij?</label>${ta("waarom","Wat maakt dat je dit zo graag wilt?")}</div>
+  <div class="cdd">Spelersprofiel · Droom</div>`}
+
+/* ================= Stap 2 · Resultaat ================= */
+function resFields(r,i){
+  const F=(k,l,ph,cls="",ex="")=>`<div class="fld"><label for="f-res.${i}.${k}">${l}</label>${inp(`res.${i}.${k}`,ph,cls,ex)}</div>`;
+  const W=F("w","Wanneer","bv. sep "+SEIZOEN);
+  if(r.t==="Handicap")return `<div class="g3">${F("a","Huidige handicap","bv. 9,6","num",'inputmode="decimal"')}${F("b","Doel handicap","bv. 6,5","num",'inputmode="decimal"')}${W}</div>`;
+  if(r.t==="Toernooi")return `<div class="g3">${F("a","Welk toernooi","bv. NK Jeugd")}${F("b","Gewenste plaats","bv. top 10")}${W}</div>`;
+  if(r.t==="Ranking")return `<div class="g3">${F("a","Welke ranking","bv. NGF Jeugdranking U16")}${F("b","Gewenste positie","bv. top 20")}${W}</div>`;
+  if(r.t==="Selectie")return `<div class="g2">${F("a","Welke selectie of team","bv. regioselectie, clubteam heren 1")}${W}</div>`;
+  return `<div class="rs">Kies eerst wat voor resultaat het is.</div>`;
+}
+function fRes(){
+  return S.res.map((r,i)=>`<div class="blk">
+    ${S.res.length>1?`<button class="xbtn" data-act="delres" data-i="${i}" aria-label="Verwijder resultaat ${i+1}">${IC.x}</button>`:""}
+    <div class="pr"><span class="lab">Resultaat ${i+1}</span></div>
+    <div class="chips" role="group" aria-label="Soort resultaat">${["Toernooi","Ranking","Selectie"].map(t=>`<button class="chip ${r.t===t?"on":""}" data-act="restype" data-i="${i}" data-v="${t}">${t}</button>`).join("")}</div>
+    ${resFields(r,i)}
+  </div>`).join("")+`<div>${S.res.length<4?`<button class="btn sm" data-act="addres">${IC.plus} Resultaat</button>`:""}</div><div class="cdd">Doelen · Resultaatdoel met datum</div>`}
+
+/* ================= Stap 3 · Prestatie ================= */
+function statRows(defs){return defs.map(d=>{const v=S.sc[d.id]||{};return `<div class="str">
+    <div><div class="rt">${esc(d.l)}</div><div class="rs">${esc(d.u)||"&nbsp;"}</div></div>
+    ${inp(`sc.${d.id}.nu`,"nu","num",`inputmode="decimal" aria-label="${esc(d.l)} nu"`)}<span class="arr">${IC.arr}</span>
+    ${inp(`sc.${d.id}.dl`,"doel","num",`inputmode="decimal" aria-label="${esc(d.l)} doel"`)}
+    ${rlPill(R(d.r))}
+    ${d.tee?`<div class="tee"><span class="lab">Gespeeld van tee</span><select class="in" id="f-sc.${d.id}.tee" data-b="sc.${d.id}.tee">${["",...TEES].map(t=>`<option value="${t}" ${v.tee===t?"selected":""}>${t||"Kies…"}</option>`).join("")}</select></div>`:""}
+  </div>`}).join("")}
+function fPres(){
+  if(S.sc.hcp==null&&S.g.hcp)S.sc.hcp={nu:S.g.hcp,dl:""};
+  const c=OND.find(x=>x.k===cat);
+  const eig=S.eigen.map((e,i)=>({e,i})).filter(x=>x.e.c===cat);
+  const head=`<div class="sth"><span class="cap">Statistiek</span><span class="cap" style="text-align:center">Nu</span><span></span><span class="cap" style="text-align:center">Doel</span><span></span></div>`;
+  return `
+  <div class="card sub">
+    <div class="chd"><h3>Scoring</h3><span class="hdnote">nu ${IC.arr} doel${fase()?" · richtlijn "+fase():""}</span></div>
+    <div>${head}${statRows(SC_BASIS)}${hasStats()?statRows(SC_STATS):""}${S.scE.map((e,i)=>`<div class="str">
+      <div>${inp(`scE.${i}.l`,"Eigen doel, bv. birdies per ronde","",`aria-label="Naam eigen doel ${i+1}"`)}</div>
+      ${inp(`scE.${i}.nu`,"nu","num",`inputmode="decimal" aria-label="Eigen doel ${i+1} nu"`)}<span class="arr">${IC.arr}</span>
+      ${inp(`scE.${i}.dl`,"doel","num",`inputmode="decimal" aria-label="Eigen doel ${i+1} doel"`)}
+      <div style="justify-self:end"><button class="xbtn" data-act="delscE" data-i="${i}" aria-label="Verwijder eigen doel">${IC.x}</button></div></div>`).join("")}</div>
+    <div><button class="btn sm" data-act="addscE">${IC.plus} Eigen doel</button></div>
+    ${!hasStats()?`<div class="rs">Houd je wel statistieken bij? Zet dat aan bij <button class="btn sm" data-act="step" data-v="0">Gegevens</button></div>`:""}
+    <div class="cdd">Doelen · Prestatiedoel scoring</div>
+  </div>
+  <div class="card sub">
+    <div class="chd"><h3>Prestatieontwikkelingen</h3><span class="cvn ${chosen().length?"o":""}">${chosen().length}</span><span class="hdnote">${fase()?"Richtlijnen MJOP "+fase():"Vul je handicap in voor jouw richtlijnen"}</span></div>
+    <div class="lead">Mijn belangrijkste prestatieontwikkelingen om mijn doel(en) te halen zijn:</div>
+    <div class="cats" role="tablist" aria-label="Onderdelen">${OND.map(x=>`<button class="cat ${x.k===cat?"on":""}" data-act="cat" data-v="${x.k}">${x.n}${countCat(x.k)?`<span class="n">${countCat(x.k)}</span>`:""}</button>`).join("")}</div>
+    ${c.range?`<div class="rs">${esc(c.n)}: ${esc(c.range)}</div>`:""}
+    ${hasStats()&&c.stats.length?`<div>${head}${statRows(c.stats)}</div>`:""}
+    <div class="sgrp">${c.items.map(it=>`<button class="stmt ${S.stel[it[0]]?"on":""}" data-act="stel" data-v="${it[0]}" aria-pressed="${!!S.stel[it[0]]}"><span class="ck">${S.stel[it[0]]?IC.chk:""}</span><span class="tx">${esc(T(it[1]))}</span><span class="rl">${esc(FI()?it[3]:it[2])}</span></button>`).join("")}
+      ${eig.map(x=>`<div class="stmt on" style="cursor:default"><span class="ck">${IC.chk}</span><span class="tx">${esc(x.e.t)}</span><span style="display:flex;gap:6px;align-items:center">${x.e.r?`<span class="rl">Doel ${esc(x.e.r)}</span>`:""}<button class="xbtn" data-act="deleigen" data-i="${x.i}" aria-label="Verwijder eigen doel">${IC.x}</button></span></div>`).join("")}
+    </div>
+    <div class="fld"><label for="eig-t">Eigen doel bij ${esc(c.n)}</label>
+      <div class="addline"><input class="in" id="eig-t" placeholder="Schrijf je eigen doel"><input class="in" id="eig-r" placeholder="Doel, bv. 70%"><button class="btn sm" data-act="addeigen">Toevoegen</button></div></div>
+    ${note("pres_"+c.k,"Toelichting bij "+c.n,"Optioneel: waarom kies je deze doelen?")}
+    <div class="cdd">Doelen · Prestatiedoel met richtlijn (MJOP)</div>
+  </div>`}
+
+/* ================= Stap 4 · Ontwikkeling ================= */
+const pct=v=>(v??0)*10+"%";
+function slider(k,w,v,lab){return `<div class="sl"><span class="lab">${w==="nu"?"Nu":"Doel"}</span><input type="range" min="0" max="10" step="1" class="${w}" id="r-${k}-${w}" data-sl="${k}.${w}" value="${v??0}" style="--p:${v==null?"0%":pct(v)}" aria-label="${esc(lab)} ${w==="nu"?"nu":"doel"}"><span class="v" id="v-${k}-${w}">${v??"–"}</span></div>`}
+function fOntw(){return ONTW.map(g=>`<div class="ogroup">${g.items.length>1?`<span class="cap">${g.g}</span>`:""}${g.items.map(([k,n,h])=>{const w=S.ow[k];return `<div class="oitem">
+    <div class="top"><span class="rt">${n}</span>${countCat(k)?`<span class="st or">${countCat(k)} doel${countCat(k)>1?"en":""}</span>`:""}${h?`<span class="rs">${esc(h)}</span>`:""}</div>
+    ${slider(k,"nu",w.nu,n)}${slider(k,"dl",w.dl,n)}
+    <div class="fld"><span class="lab">Impact op mijn score</span><div class="chips">${IMPACT.map(x=>`<button class="chip ${w.imp===x?"on":""}" data-act="imp" data-k="${k}" data-v="${x}">${x}</button>`).join("")}</div></div>
+    <div class="fld"><span class="lab">Mijn ontwikkelpunten</span>
+      ${w.pts.length?`<div class="ptlist">${w.pts.map((p,i)=>`<div class="pt"><span class="dot o"></span><span>${esc(p)}</span><button class="xbtn" data-act="delpt" data-k="${k}" data-i="${i}" aria-label="Verwijder ontwikkelpunt">${IC.x}</button></div>`).join("")}</div>`:""}
+      <div class="addpt"><input class="in" id="pt-${k}" data-enter="addpt" data-k="${k}" placeholder="Wat wil ik beter kunnen bij ${esc(n.toLowerCase())}?"><button class="btn sm" data-act="addpt" data-k="${k}">${IC.plus} Ontwikkelpunt</button></div>
+    </div>
+  </div>`}).join("")}</div>`).join("")+`<div class="cdd">Ontwikkelplan · Zelfbeoordeling, impact en ontwikkelpunten</div>`}
+
+/* ================= Stap 5 · Acties ================= */
+function fAct(){const a=S.ac;
+  const sum=(+a.lang||0)+(+a.short||0)+(+a.putt||0);
+  const n=(p,ph,w="")=>`<input class="in num" id="f-${p}" data-b="${p}" value="${esc(getP(p))}" placeholder="${ph==="…"?"":ph}" inputmode="numeric" ${w}>`;
+  const row=(l,sub,ctrl,key)=>`<div class="arow"><div><div class="rt">${l}</div>${sub?`<div class="rs">${sub}</div>`:""}</div><div>${ctrl}</div>${rlPill(R(AR[key]))}</div>`;
+  return `<div>
+   ${row("Uren golftraining per week","In het seizoen",`<div class="ain">${n("ac.uren","…")}<span>uur</span></div>`,"uren")}
+   <div class="arow"><div><div class="rt">Verdeling van mijn training</div><div class="rs">Op de baan is altijd 50%. Verdeel de andere 50% zelf.</div></div><div></div>${rlPill(R(AR.verd))}
+     <div class="verd full">
+       <div class="tile"><span class="cap">Op de baan</span><span class="fixed">50</span><span class="rs">%</span></div>
+       <div class="tile"><span class="cap">Lange spel</span>${n("ac.lang","…")}<span class="rs">%</span></div>
+       <div class="tile"><span class="cap">Short game</span>${n("ac.short","…")}<span class="rs">%</span></div>
+       <div class="tile"><span class="cap">Putten</span>${n("ac.putt","…")}<span class="rs">%</span></div>
+     </div>
+     <div class="sum full ${sum===50?"ok":sum?"bad":""}" id="verdsum">${sumTxt(sum)}</div>
+   </div>
+   ${row("Fysieke training per week","",`<div class="ain">${n("ac.fysX","…")}<span>× per week</span>${n("ac.fysM","…")}<span>min</span></div>`,"fys")}
+   ${row("Holes spelen per week","Buiten wedstrijden",`<div class="ain">${n("ac.holes","…")}<span>holes</span></div>`,"holes")}
+   ${row("Wedstrijdrondes per jaar","",`<div class="ain">${n("ac.wr","…")}<span>rondes</span></div>`,"wr")}
+   <div class="arow"><div><div class="rt">Toernooien</div><div class="rs">Vink aan op welk niveau je speelt en hoeveel</div></div>
+     <div style="display:grid;gap:6px">${TOER.map(t=>{const o=a.toer[t]||{};return `<div class="ain"><button class="chip ${o.on?"on":""}" data-act="toer" data-v="${t}" style="min-width:132px">${o.on?IC.chk:""}${t}</button>${o.on?`${n(`ac.toer.${t}.n`,"aantal")}`:""}</div>`}).join("")}</div>${rlPill(R(AR.toer))}</div>
+   <div class="arow"><div><div class="rt">Competitie</div><div class="rs">Speel je competitie? Zo ja, welke?</div></div>
+     <div style="display:grid;gap:6px"><div class="chips">${[["ja","Ja"],["nee","Nee"]].map(o=>`<button class="chip ${a.comp===o[0]?"on":""}" data-act="comp" data-v="${o[0]}">${o[1]}</button>`).join("")}</div>
+       ${a.comp==="ja"?a.comps.map((c,i)=>`<div class="addpt"><input class="in" id="f-ac.comps.${i}" data-b="ac.comps.${i}" list="complist" value="${esc(c)}" placeholder="bv. jeugdcompetitie" aria-label="Competitie ${i+1}">${a.comps.length>1?`<button class="xbtn" data-act="delcomp" data-i="${i}" aria-label="Verwijder competitie">${IC.x}</button>`:"<span></span>"}</div>`).join("")+`<div><button class="btn sm" data-act="addcomp">${IC.plus} Competitie</button></div>`:""}
+       <datalist id="complist"><option value="Jeugdcompetitie"><option value="Herencompetitie"><option value="Damescompetitie"><option value="Clubcompetitie"></datalist></div>${rlPill(R(AR.comp))}</div>
+  </div>
+  <div class="fld"><span class="lab">Eigen acties</span>
+    ${a.eigen.map((x,i)=>`<div class="addpt">${inp(`ac.eigen.${i}`,"bv. elke zondag 9 holes met mijn vader")}<button class="xbtn" data-act="delacteigen" data-i="${i}" aria-label="Verwijder">${IC.x}</button></div>`).join("")}
+    <div><button class="btn sm" data-act="addacteigen">${IC.plus} Eigen actie</button></div></div>
+  <div class="cdd">Trainingsplan · Algemene procesdoelen</div>`}
+const sumTxt=s=>s===50?IC.chk+" Samen met de baan is het 100%":s?`Lange spel + short game + putten = ${s}%. Dat moet samen 50% zijn.`:"Lange spel + short game + putten = samen 50%";
+
+/* ================= Stap 6 · Wensen ================= */
+function fWens(){return `<ol class="wl">${S.wens.map((w,i)=>`<li>${inp(`wens.${i}`,i===0?"bv. Een keer een Trackman-sessie om mijn afstanden te meten":"Nog een wens","",`aria-label="Wens ${i+1}" data-enter="addwens"`)}${S.wens.length>1?`<button class="xbtn" data-act="delwens" data-i="${i}" aria-label="Verwijder wens ${i+1}">${IC.x}</button>`:"<span></span>"}</li>`).join("")}</ol>
+  <div><button class="btn sm" data-act="addwens">${IC.plus} Wens</button></div><div class="cdd">Trainingsplanning · Wensen speler</div>`}
+
+const FORMS=[fGeg,fDroom,fRes,fPres,fOntw,fAct,fWens];
+
+/* ================= Samenvatting ================= */
+function side(){
+  const L=[["Gegevens",naam()?`${naam()}${fase()?" · "+fase():""}`:"—"],["Droom",S.droom||"—"],["Resultaat",resF().map(resText).join(" · ")||"—"],["Prestatie",chosen().length?chosen().length+" doelen gekozen":"—"],["Ontwikkeling",owTouched().length?owTouched().length+" onderdelen ingevuld":"—"],["Acties",acSummary().length?acSummary().length+" acties":"—"],["Wensen",wensF().length?wensF().length+" wensen":"—"]];
+  return `<div class="card"><div class="chd"><h3>Mijn doelenkaart</h3><span class="cvn">${SEIZOEN}</span></div><div class="mini">${L.map((l,i)=>`<div class="row"><span class="dot ${i===1?"o":""}"></span><div><div class="cap">${l[0]}</div><div class="rs" style="color:var(--ink)">${esc(l[1])}</div></div></div>`).join("")}</div><button class="btn" data-mode="kaart">Bekijk doelenkaart</button></div>`;
+}
+function viewVul(){
+  const s=STEPS[step];
+  return `<div class="steps">${STEPS.map((x,i)=>`<button class="sb ${i<step?"done":""} ${i===step?"on":""}" data-act="step" data-v="${i}" aria-current="${i===step?"step":"false"}"><i>${i<step?IC.chk:i+1}</i><span>${x[0]}</span></button>`).join("")}</div>
+  <div class="wbody">
+    <div class="card" style="gap:12px">
+      <div class="shead"><span class="cap">Stap ${step+1} van 7 · ${s[0]}</span><h2>${s[1]}</h2><p>${s[2]}</p></div>
+      <div class="prompt"><span class="cap">Tip van de coach</span>${s[3]}</div>
+      ${FORMS[step]()}
+      ${note(NK[step],"Opmerkingen / toelichting",NOTE_PH[step])}
+      <div class="wfoot"><button class="btn" data-act="go" data-v="-1" ${step===0?"disabled":""}>${IC.prev} Vorige</button>${step<6?`<button class="btn o" data-act="go" data-v="1">Volgende ${IC.next}</button>`:`<button class="btn o" data-mode="kaart">Bekijk mijn doelenkaart ${IC.next}</button>`}</div>
+    </div>
+    <div class="side" id="side">${side()}</div>
+  </div>`;
+}
+
+/* ================= Doelenkaart ================= */
+function viewKaart(){
+  const ed=s=>`<button class="xbtn end" data-act="edit" data-v="${s}" aria-label="Bewerken">${IC.edit}</button>`;
+  const emp=s=>`<div class="empty">Nog niet ingevuld. <button class="btn sm" data-act="edit" data-v="${s}">Naar stap ${s+1}</button></div>`;
+  const st=filledStats(),ch=chosen(),ow=owTouched(),ac=acSummary();
+  const grouped=OND.map(c=>({c,l:ch.filter(s=>s.c===c.k)})).filter(g=>g.l.length);
+  return `<div class="dgrid">
+    ${nt("geg")?`<div class="card span3"><div class="chd"><h3>Over mij</h3>${ed(0)}</div>${knote("geg","Opmerkingen")}</div>`:""}
+    <div class="card span3"><div class="chd"><h3>Droom</h3>${ed(1)}</div>${S.droom?`<div class="dream"><q>${esc(S.droom)}</q><span class="rs">${esc(S.waarom)}</span></div>`:emp(1)}${knote("droom")}</div>
+    <div class="card"><div class="chd"><h3>Resultaatdoelen</h3><span class="cvn">${resF().length}</span>${ed(2)}</div>${resF().length?`<div>${resF().map(r=>`<div class="row"><span class="dot o"></span><div><div class="rt">${esc(resText(r))}</div><div class="rs">${esc(r.t)}</div></div>${r.w?`<span class="st">${esc(r.w)}</span>`:"<span></span>"}</div>`).join("")}</div>`:emp(2)}${knote("res")}</div>
+    <div class="card span2"><div class="chd"><h3>Prestatiedoelen</h3><span class="cvn ${ch.length?"o":""}">${ch.length}</span>${ed(3)}</div>
+      ${st.length?`<div class="tiles">${st.map(d=>`<div class="tile2"><span class="cap">${esc(d.l)}</span><span class="big">${esc(d.v.nu)||"–"} <small>${IC.arr} ${esc(d.v.dl)||"–"}</small></span><span class="rs">${esc([d.u,d.v.tee&&"tee "+d.v.tee.toLowerCase()].filter(Boolean).join(" · "))||"&nbsp;"}</span></div>`).join("")}</div>`:""}
+      ${ch.length?`<div><div class="cap" style="padding-bottom:2px">Mijn belangrijkste prestatieontwikkelingen</div>${grouped.map(g=>g.l.map(s=>`<div class="row"><span class="dot"></span><div><div class="rt">${esc(s.t)}</div><div class="rs">${esc(g.c.n)}${s.eigen?" · eigen doel":""}</div></div>${s.r?`<span class="rl">${s.eigen?"Doel":"Richtlijn"} ${esc(s.r)}</span>`:"<span></span>"}</div>`).join("")).join("")}</div>`:(st.length?"":emp(3))}
+      ${knote("pres")}${OND.map(c=>knote("pres_"+c.k,"Toelichting "+c.n)).join("")}
+    </div>
+    <div class="card span2"><div class="chd"><h3>Ontwikkeling per onderdeel</h3><span class="legend"><span><i></i>Nu</span><span><i class="o"></i>Doel</span></span>${ed(4)}</div>
+      ${ow.length?`<div>${ow.map(o=>{const w=S.ow[o.k];return `<div class="bar"><span class="lbl">${o.n}${w.imp?`<span class="st ${w.imp==="Hoog"?"or":""}">Impact ${w.imp.toLowerCase()}</span>`:""}</span><div class="trk"><div class="fill" style="width:${(w.nu||0)*10}%"></div>${w.dl!=null?`<div class="tg" style="left:calc(${w.dl*10}% - 2px)"></div>`:""}</div><span class="val">${w.nu??"–"} ${IC.arr} ${w.dl??"–"}</span></div>${w.pts.length?`<div class="bsub">${w.pts.map(esc).join(" · ")}</div>`:""}`}).join("")}</div>`:emp(4)}${knote("ontw")}</div>
+    <div class="card"><div class="chd"><h3>Acties</h3><span class="cvn">${ac.length}</span>${ed(5)}</div>${ac.length?`<div>${ac.map(x=>`<div class="row"><span class="dot"></span><div><div class="rt">${esc(x[1])}</div><div class="rs">${esc(x[0])}${x[2]?" · richtlijn "+esc(R(x[2])):""}</div></div><span></span></div>`).join("")}</div>`:emp(5)}${knote("act")}</div>
+    <div class="card span3"><div class="chd"><h3>Wensen voor de trainingen</h3><span class="cvn">${wensF().length}</span>${ed(6)}</div>${wensF().length?`<ol class="wl">${wensF().map(w=>`<li><span>${esc(w)}</span><span></span></li>`).join("")}</ol>`:emp(6)}${knote("wens")}</div>
+    <div class="card span3"><div class="chd"><h3>Versturen naar de coaches</h3></div>
+      <div style="display:grid;gap:8px">
+        ${naam()?"":`<div class="rs" style="color:var(--red)">Vul eerst je naam in bij Gegevens.</div>`}
+        <div class="chips"><button class="btn o" data-act="pdf" ${naam()?"":"disabled"}>PDF maken</button><button class="btn" data-act="json">Kopieer voor C@ddie</button></div>
+        ${sent?`<div class="rs">Stuur de PDF als bijlage naar:</div>${COACHES.map(c=>`<div class="mail"><span class="rs">${esc(c.naam)}</span><code>${esc(c.email)}</code><button class="btn sm" data-act="copy" data-v="${esc(c.email)}">Kopieer adres</button><a class="btn sm" style="text-decoration:none;color:inherit" href="mailto:${esc(c.email)}?subject=${encodeURIComponent("Doelen "+SEIZOEN+" – "+naam())}">Open e-mail</a></div>`).join("")}`:`<div class="rs">Maak eerst de PDF. Daarna zie je naar wie je hem stuurt.</div>`}
+      </div></div>
+  </div>`;
+}
+
+/* ================= Render ================= */
+function updKop(){const k=document.getElementById("kop");if(k)k.innerHTML=kop()}
+function render(){
+  document.getElementById("app").innerHTML=`<div id="kop" style="display:grid;gap:14px">${kop()}</div>`+(mode==="vul"?viewVul():viewKaart())+
+   `<div class="foot"><span>Wordt automatisch bewaard op dit apparaat</span><button data-act="wis">${confirmWis?"Klik nogmaals om alles te wissen":"Alles wissen"}</button></div>`;
+}
+render();
+
+/* ================= Interactie ================= */
+document.addEventListener("input",e=>{
+  const t=e.target;
+  if(t.dataset.sl){const[k,w]=t.dataset.sl.split(".");const v=+t.value;S.ow[k][w]=v;t.style.setProperty("--p",pct(v));document.getElementById(`v-${k}-${w}`).textContent=v;save();return}
+  const p=t.dataset.b;if(!p)return;
+  setP(p,t.value);save();
+  if(p==="g.hcp"){const fi=document.getElementById("faseinfo");if(fi)fi.innerHTML=faseInfo()}
+  if(/^g\./.test(p))updKop();
+  if(/^ac\.(lang|short|putt)$/.test(p)){const s=(+S.ac.lang||0)+(+S.ac.short||0)+(+S.ac.putt||0),el=document.getElementById("verdsum");el.innerHTML=sumTxt(s);el.className="sum "+(s===50?"ok":s?"bad":"")}
+  const sd=document.getElementById("side");if(sd)sd.innerHTML=side();
+});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.tagName==="SELECT"&&t.dataset.b){setP(t.dataset.b,t.value);save()}
+  if(/^g\./.test(t.dataset.b||""))updKop();
+});
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter"||!e.target.dataset.enter)return;e.preventDefault();
+  const b=document.querySelector(`button[data-act="${e.target.dataset.enter}"]${e.target.dataset.k?`[data-k="${e.target.dataset.k}"]`:""}`);b&&b.click();
+});
+
+document.addEventListener("click",async e=>{
+  const t=e.target.closest("button");if(!t)return;
+  const a=t.dataset.act,v=t.dataset.v,i=+t.dataset.i,k=t.dataset.k;
+  if(t.dataset.mode){mode=t.dataset.mode;sent=false;render();scrollTo({top:0});return}
+  if(a!=="wis")confirmWis=false;
+  let focusId=null;
+  switch(a){
+    case "step":step=+v;mode="vul";scrollTo({top:0});break;
+    case "go":step=Math.max(0,Math.min(6,step+ +v));scrollTo({top:0});break;
+    case "edit":mode="vul";step=+v;scrollTo({top:0});break;
+    case "stats":S.g.stats=v;break;
+    case "restype":{const r=S.res[i];if(r.t!==v){r.t=v;r.a="";r.b=""}break}
+    case "addres":S.res.push({t:"",w:"",a:"",b:""});break;
+    case "delres":S.res.splice(i,1);break;
+    case "addscE":S.scE.push({l:"",nu:"",dl:""});focusId=`f-scE.${S.scE.length-1}.l`;break;
+    case "delscE":S.scE.splice(i,1);break;
+    case "cat":cat=v;break;
+    case "stel":S.stel[v]=!S.stel[v];break;
+    case "addeigen":{const tt=document.getElementById("eig-t").value.trim();if(!tt){document.getElementById("eig-t").focus();return}S.eigen.push({c:cat,t:tt,r:document.getElementById("eig-r").value.trim()});break}
+    case "deleigen":S.eigen.splice(i,1);break;
+    case "imp":S.ow[k].imp=S.ow[k].imp===v?"":v;break;
+    case "addpt":{const el=document.getElementById("pt-"+k),tt=el.value.trim();if(!tt){el.focus();return}S.ow[k].pts.push(tt);focusId="pt-"+k;break}
+    case "delpt":S.ow[k].pts.splice(i,1);break;
+    case "toer":{const o=S.ac.toer[v]||(S.ac.toer[v]={});o.on=!o.on;break}
+    case "comp":S.ac.comp=S.ac.comp===v?"":v;if(!S.ac.comps||!S.ac.comps.length)S.ac.comps=[""];break;
+    case "addcomp":S.ac.comps.push("");focusId=`f-ac.comps.${S.ac.comps.length-1}`;break;
+    case "delcomp":S.ac.comps.splice(i,1);break;
+    case "addacteigen":S.ac.eigen.push("");focusId=`f-ac.eigen.${S.ac.eigen.length-1}`;break;
+    case "delacteigen":S.ac.eigen.splice(i,1);break;
+    case "addwens":S.wens.push("");focusId=`f-wens.${S.wens.length-1}`;break;
+    case "delwens":S.wens.splice(i,1);break;
+    case "pdf":await makePdf();return;
+    case "json":copy(JSON.stringify(exportData(),null,2),"Gekopieerd voor C@ddie");return;
+    case "copy":copy(v,"Adres gekopieerd");return;
+    case "wis":if(!confirmWis){confirmWis=true;break}S=blank();confirmWis=false;step=0;toast("Alles gewist");break;
+    default:return;
+  }
+  save();
+  const y=scrollY;render();scrollTo({top:y});
+  if(focusId){const f=document.getElementById(focusId);f&&f.focus({preventScroll:true})}
+});
+
+async function copy(txt,msg){
+  try{await navigator.clipboard.writeText(txt);toast(msg)}
+  catch(err){const ta=document.createElement("textarea");ta.value=txt;document.body.append(ta);ta.select();try{document.execCommand("copy");toast(msg)}catch(x){toast("Kopiëren lukt niet hier")}ta.remove()}
+}
+
+/* ================= Export voor C@ddie ================= */
+function exportData(){return {
+  seizoen:SEIZOEN,
+  speler:{naam:naam(),geboortejaar:S.g.gj,categorie:leeftijdCat(),handicap:S.g.hcp,mjopFase:fase(),houdtStatistiekenBij:S.g.stats==="ja"},
+  droom:{droom:S.droom,waarom:S.waarom},
+  resultaatdoelen:resF().map(r=>({soort:r.t,doel:resText(r),veld1:r.a,veld2:r.b,wanneer:r.w})),
+  prestatiedoelen:{
+    statistieken:filledStats().map(d=>({id:d.id,naam:d.l,eenheid:d.u,nu:d.v.nu||"",doel:d.v.dl||"",tee:d.v.tee||undefined,richtlijn:R(d.r)})),
+    doelen:chosen().map(s=>({onderdeel:s.cn,doel:s.t,[s.eigen?"eigenDoelWaarde":"richtlijn"]:s.r,eigen:!!s.eigen}))},
+  ontwikkeling:ONTW_FLAT.map(o=>({categorie:o.g,onderdeel:o.n,nu:S.ow[o.k].nu,doel:S.ow[o.k].dl,impact:S.ow[o.k].imp,ontwikkelpunten:S.ow[o.k].pts})),
+  acties:{urenGolfPerWeek:S.ac.uren,verdeling:{baan:50,langeSpel:S.ac.lang,shortGame:S.ac.short,putten:S.ac.putt},fysiek:{perWeek:S.ac.fysX,minuten:S.ac.fysM},holesPerWeek:S.ac.holes,wedstrijdrondesPerJaar:S.ac.wr,
+    toernooien:TOER.filter(x=>S.ac.toer[x]?.on).map(x=>({niveau:x,aantal:S.ac.toer[x].n||""})),competitie:S.ac.comp?{speeltCompetitie:S.ac.comp==="ja",competities:S.ac.comp==="ja"?S.ac.comps.filter(x=>x.trim()):[]}:null,eigen:S.ac.eigen.filter(x=>x.trim())},
+  wensen:wensF(),
+  toelichtingen:Object.fromEntries(Object.entries(S.notes).filter(([k,v])=>String(v).trim()))
+}}
+
+/* ================= PDF ================= */
+async function makePdf(){
+  if(!window.jspdf){toast("PDF-module niet geladen. Probeer opnieuw.");return}
+  const {jsPDF}=window.jspdf;const d=new jsPDF({unit:"mm",format:"a4"});
+  const W=210,M=16,CW=W-2*M;let y=0;
+  const OR=[244,124,32],OI=[180,86,26],INK=[43,47,51],MU=[122,127,133],LN=[230,232,234],PA=[242,243,245];
+  const clean=s=>String(s??"").replace(/→/g,">").replace(/≤/g,"<=").replace(/-/g,"-").replace(/[“”]/g,'"');
+  const need=h=>{if(y+h>282){d.addPage();y=18}};
+  const head=t=>{need(16);y+=4;d.setFont("helvetica","bold");d.setFontSize(8);d.setTextColor(...OR);d.text(t.toUpperCase(),M,y,{charSpace:.4});y+=2;d.setDrawColor(...LN);d.setLineWidth(.3);d.line(M,y,W-M,y);y+=5};
+  const para=(t,sz=10,st="normal",col=INK,x=M,w=CW)=>{d.setFont("helvetica",st);d.setFontSize(sz);d.setTextColor(...col);d.splitTextToSize(clean(t),w).forEach(l=>{need(sz*.45);d.text(l,x,y);y+=sz*.45})};
+  const none=()=>para("Niet ingevuld",9.5,"normal",MU);
+  const pnote=(k,label="Toelichting")=>{if(!nt(k))return;y+=1.5;para(label,8,"bold",MU);para(nt(k),9.2,"normal",INK);y+=1};
+  const item=(t,sub,right)=>{d.setFont("helvetica","bold");d.setFontSize(10);const rw=right?Math.min(70,d.getTextWidth(clean(right))*0.85+4):0;const ls=d.splitTextToSize(clean(t),CW-6-rw);need(ls.length*4.6+(sub?4.2:0)+2);
+    d.setFillColor(...(right?OR:MU));d.circle(M+1.2,y-1.2,.9,"F");d.setTextColor(...INK);ls.forEach((l,i)=>d.text(l,M+5,y+i*4.6));
+    if(right){d.setFont("helvetica","bold");d.setFontSize(8);d.setTextColor(...OI);d.text(d.splitTextToSize(clean(right),rw),W-M,y,{align:"right"})}
+    y+=ls.length*4.6;if(sub){d.setFont("helvetica","normal");d.setFontSize(8.5);d.setTextColor(...MU);d.text(d.splitTextToSize(clean(sub),CW-6)[0],M+5,y);y+=4.2}y+=1.6};
+
+  d.setFillColor(...OR);d.rect(0,0,W,3,"F");
+  y=16;d.setFont("helvetica","bold");d.setFontSize(18);d.setTextColor(...INK);d.text(clean(naam()),M,y);
+  d.setFont("helvetica","normal");d.setFontSize(10);d.setTextColor(...MU);d.text(`Doelen seizoen ${SEIZOEN} · TOP Almeerderhout`,M,y+6);
+  d.setFontSize(9);d.text([S.g.gj&&"Geboren "+S.g.gj,leeftijdCat()&&leeftijdCat()+" in "+SEIZOEN,S.g.hcp&&"Handicap "+S.g.hcp,fase()&&"MJOP "+fase()+" ("+faseNaam()+")"].filter(Boolean).join(" · "),M,y+11.5);
+  d.text(new Date().toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"}),W-M,y,{align:"right"});
+  y+=18;
+  if(nt("geg")){pnote("geg","Opmerkingen");y+=2}
+
+  head("1 · Droom");
+  if(S.droom){para(S.droom,13,"bold");y+=1;if(S.waarom)para("Waarom: "+S.waarom,9.5,"normal",MU)}else none();
+  pnote("droom");
+
+  head("2 · Resultaatdoelen");
+  resF().length?resF().forEach(r=>item(resText(r),r.t,r.w)):none();
+  pnote("res");
+
+  head("3 · Prestatiedoelen");
+  const st=filledStats();
+  if(st.length){const per=4,tw=(CW-(per-1)*3)/per,th=17;st.forEach((s,i)=>{const col=i%per;if(col===0){if(i)y+=th+3;need(th+2)}const x=M+col*(tw+3);d.setFillColor(...PA);d.roundedRect(x,y,tw,th,2,2,"F");d.setFont("helvetica","bold");d.setFontSize(6.4);d.setTextColor(...MU);d.text(d.splitTextToSize(clean(s.l).toUpperCase(),tw-5).slice(0,2),x+3,y+4.3);d.setFontSize(12);d.setTextColor(...INK);const nu=clean(s.v.nu)||"-";d.text(nu,x+3,y+13.5);const wn=d.getTextWidth(nu+" ");d.setTextColor(...OI);d.setFontSize(10);d.text("> "+(clean(s.v.dl)||"-")+(s.v.tee?"  (tee "+s.v.tee.toLowerCase()+")":""),x+3+wn,y+13.5)});y+=th+6}
+  para("Mijn belangrijkste prestatieontwikkelingen om mijn doel(en) te halen zijn:",9.5,"bold");y+=1.5;
+  chosen().length?chosen().forEach(s=>item(s.t,s.cn+(s.eigen?" · eigen doel":""),s.r?(s.eigen?"Doel ":"Richtlijn ")+s.r:"")):para("Geen doelen gekozen",9.5,"normal",MU);
+  pnote("pres");OND.forEach(c=>pnote("pres_"+c.k,"Toelichting "+c.n));
+
+  head("4 · Ontwikkeling per onderdeel (0–10)");
+  const ow=owTouched();
+  if(ow.length){ow.forEach(o=>{const w=S.ow[o.k];need(10);d.setFont("helvetica","bold");d.setFontSize(9.5);d.setTextColor(...INK);d.text(o.n,M,y);
+    if(w.imp){d.setFont("helvetica","normal");d.setFontSize(8);d.setTextColor(...(w.imp==="Hoog"?OI:MU));d.text("Impact "+w.imp.toLowerCase(),M+48,y)}
+    const bx=M+82,bw=66;d.setFillColor(...PA);d.roundedRect(bx,y-3,bw,3.4,1.7,1.7,"F");if(w.nu){d.setFillColor(169,174,179);d.roundedRect(bx,y-3,bw*w.nu/10,3.4,1.7,1.7,"F")}if(w.dl!=null){d.setFillColor(...OR);d.rect(bx+bw*w.dl/10-.6,y-4.2,1.2,5.8,"F")}
+    d.setFontSize(8.5);d.setTextColor(...MU);d.text(`${w.nu??"-"} > ${w.dl??"-"}`,W-M,y,{align:"right"});y+=5;
+    w.pts.forEach(p=>{para("- "+p,8.8,"normal",INK,M+3,CW-3)});y+=2});
+    d.setFontSize(7.5);d.setTextColor(...MU);d.text("Grijs = nu, oranje streep = doel",M,y);y+=3}
+  else none();
+  pnote("ontw");
+
+  head("5 · Acties");
+  const ac=acSummary();ac.length?ac.forEach(x=>item(x[1],x[0],x[2]?"Richtlijn "+R(x[2]):"")):none();
+  pnote("act");
+
+  head("6 · Wensen voor de trainingen");
+  wensF().length?wensF().forEach((w,i)=>{para(`${i+1}.  ${w}`,10);y+=1.2}):none();
+  pnote("wens");
+
+  const pages=d.getNumberOfPages();for(let p=1;p<=pages;p++){d.setPage(p);d.setFont("helvetica","normal");d.setFontSize(7.5);d.setTextColor(...MU);d.text(`C@ddie · Doelen ${SEIZOEN} · ${clean(naam())}`,M,292);d.text(`${p}/${pages}`,W-M,292,{align:"right"})}
+
+  const fname=`Doelen ${SEIZOEN} - ${naam()}.pdf`;
+  const blob=d.output("blob");
+  let done=false;
+  try{const dl=window.claude?.use?await window.claude.use("downloads"):null;
+    if(dl){await dl.save({filename:fname,data:blob});done=true}}
+  catch(err){if(err&&err.code==="declined"){toast("Opslaan geannuleerd");return}}
+  if(!done){try{const u=URL.createObjectURL(blob);const l=document.createElement("a");l.href=u;l.download=fname;document.body.append(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);done=true}catch(x){}}
+  sent=true;render();toast(done?"PDF opgeslagen":"PDF maken lukt hier niet");
+}
+
+</script>
